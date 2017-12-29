@@ -5,7 +5,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 import requests
 
-acorn_url = 'https://acorn.utoronto.ca/sws/welcome.do?welcome.dispatch'
+login_url = 'https://weblogin.utoronto.ca/'
+acorn_url = 'https://acorn.utoronto.ca/sws/welcome.do?welcome.dispatch#/'
 marks_url = 'https://acorn.utoronto.ca/sws/transcript/academic/main.do?main.dispatch'
 
 wait_interval = 10
@@ -18,40 +19,32 @@ def read_credentials():
 
 def submit_credentials(driver):
       credentials = read_credentials()
-      
+      username = credentials[0].strip()
+      password = credentials[1].strip()
       user = driver.find_element_by_name("user")
-      user.clear()
-      user.send_keys(credentials[0])    #Your username
-
+      user.send_keys(username)    #Your username
       pas = driver.find_element_by_name("pass")
-      pas.clear()
-      pas.send_keys(credentials[1])     #Your password
-
+      pas.send_keys(password)     #Your password
       pas.send_keys(Keys.RETURN)
 
 def login():
-      driver = webdriver.Firefox()
+      driver = webdriver.PhantomJS()
       driver.get(acorn_url)
 
-      try:
-          element = WebDriverWait(driver, wait_interval).until(
-              EC.presence_of_element_located((By.NAME , "user"))
-          )
+      wait = WebDriverWait(driver, 10)
+      wait.until(lambda driver: driver.current_url == login_url)
 
-      finally:
-            submit_credentials(driver)
+      submit_credentials(driver)
 
-      try:
-          element = WebDriverWait(driver, wait_interval).until(
-              EC.presence_of_element_located((By.CLASS_NAME , "acorn"))
-          )
-      finally:
-            driver.get(marks_url)
-            for course in driver.find_elements_by_class_name("courses"):
-                  print(course.text)
-            print("\n")
-            a = input("Press a key to exit")
-            driver.close()
+      wait.until(lambda driver: driver.current_url == acorn_url)
+
+      driver.get(marks_url)
+      for course in driver.find_elements_by_class_name("courses"):
+            print(course.text)
+      print("\n")
+            
+      a = input("Press a key to exit")           
+      driver.close()
 
 if __name__ == "__main__":
       login();
