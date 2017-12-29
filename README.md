@@ -1,4 +1,4 @@
-# Acorn_marks
+# Acorn_Marks
 Receives changes about University of Toronto Acorn marks
 
 
